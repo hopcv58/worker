@@ -12,15 +12,12 @@ class Categories extends BaseModel
     ];
     protected $fillable = [
         'id',
+        'name',
         'description',
-        'address',
-        'website',
-        'type',
-        'degree',
-        'bank_account',
+        'parent_id',
     ];
     protected $hidden = [
-        'created_at','updated_at',
+        'is_public','created_at','updated_at',
     ];
 
     public function rule()

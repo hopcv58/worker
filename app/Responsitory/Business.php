@@ -26,6 +26,9 @@ class Business // extends Model
     private $users;
     private $districts;
 
+    /**
+     * Business constructor.
+     */
     public function __construct()
     {
         $this->categories = new Categories();
@@ -37,6 +40,9 @@ class Business // extends Model
         $this->districts = new Districts();
     }
 
+    /**
+     * @return array
+     */
     public function getAllWorkers()
     {
         $ids = $this->workers->select('id')->get();
@@ -47,6 +53,10 @@ class Business // extends Model
         return $workers;
     }
 
+    /**
+     * @param $id
+     * @return mixed
+     */
     public function getWorkerById($id)
     {
         $worker = $this->workers->find($id);
@@ -63,6 +73,10 @@ class Business // extends Model
         return $worker;
     }
 
+    /**
+     * @param $user_id
+     * @return mixed
+     */
     public function getWorkerByUserId($user_id)
     {
         $worker = $this->workers->where('user_id', $user_id)->first();
@@ -82,6 +96,10 @@ class Business // extends Model
         return $worker;
     }
 
+    /**
+     * @param $user_id
+     * @return mixed
+     */
     public function getCustomerByUserId($user_id)
     {
         $customer = $this->customer->where('user_id', $user_id)->first();
@@ -92,6 +110,10 @@ class Business // extends Model
         return $customer;
     }
 
+    /**
+     * @param $id
+     * @return mixed
+     */
     public function getFeedbackByWorkerId($id)
     {
         $feedbacks = $this->transactions->select('feedback', 'rate', 'finished_at', 'customer_id')->where('worker_id', '=', $id)->where('is_finished', '=', 1)->get();
@@ -103,6 +125,10 @@ class Business // extends Model
         return $feedbacks;
     }
 
+    /**
+     * @param $id
+     * @return mixed
+     */
     public function getUserByWorkerId($id)
     {
         $worker = $this->workers->find($id);
@@ -110,6 +136,10 @@ class Business // extends Model
         return $user;
     }
 
+    /**
+     * @param $id
+     * @return mixed
+     */
     public function getUserByCustomerId($id)
     {
         $customer = $this->customer->find($id);
@@ -117,6 +147,9 @@ class Business // extends Model
         return $user;
     }
 
+    /**
+     * @return mixed
+     */
     public function getAllGrandCategories()
     {
         $categories = $this->categories->where("parent_id", NULL)->get();
@@ -127,15 +160,20 @@ class Business // extends Model
     }
 
 
+    /**
+     * @param $id
+     * @return mixed
+     */
     public function getFinalParentCategory($id)
     {
         $category = $this->categories->select('id', 'name', 'description', 'parent_id')->where('id', '=', $id)->where('is_public', '=', 1)->first();
-        while ($category->parent_id != NULL) {
-            $category = $this->categories->select('name', 'description', 'parent_id')->where('id', '=', $category->parent_id)->first();
-        }
-        return $category;
+        $parent = $this->categories->select('name', 'description', 'parent_id')->where('id', '=', $category->parent_id)->first();
+        return $parent;
     }
 
+    /**
+     * @return array
+     */
     public function getAllTransactions()
     {
         $ids = $this->transactions->select('id')->get();
@@ -146,6 +184,10 @@ class Business // extends Model
         return $transactions;
     }
 
+    /**
+     * @param $id
+     * @return mixed
+     */
     public function getTransactionById($id)
     {
         $transcation = $this->transactions->find($id);
@@ -155,11 +197,15 @@ class Business // extends Model
         return $transcation;
     }
 
+    /**
+     * @param $id
+     * @return mixed
+     */
     public function getTransactionByCustomerId($id)
     {
         $transcations = $this->transactions->where("customer_id", "=", $id)->get();
         foreach ($transcations as $transcation) {
-            if(isset($transcation->worker_id)){
+            if (isset($transcation->worker_id)) {
                 $transcation->worker = $this->getUserByWorkerId($transcation->worker_id);
             }
             $transcation->customer = $this->getUserByCustomerId($transcation->customer_id);
@@ -168,6 +214,10 @@ class Business // extends Model
         return $transcations;
     }
 
+    /**
+     * @param $id
+     * @return mixed
+     */
     public function getTransactionByWorkerId($id)
     {
         $transcations = $this->transactions->where("worker_id", "=", $id)->get();
@@ -179,6 +229,9 @@ class Business // extends Model
         return $transcations;
     }
 
+    /**
+     * @param $request
+     */
     public function saveNewWorker($request)
     {
         $this->workers->id = $request->id;
@@ -192,14 +245,25 @@ class Business // extends Model
         $this->workers->save();
     }
 
+    /**
+     * @param $name
+     * @return mixed
+     */
     public function findOrCreateDistrictByName($name)
     {
-        $district = $this->districts->firstOrNew(['name' => $name]);
-        $district->id = Uuid::generate();
-        $district->save();
+        $district = $this->districts->where('name', $name)->first();
+        if (!isset($district)) {
+            $district->id = Uuid::generate();
+            $district->name = $name;
+            $district->save();
+        }
         return $district;
     }
 
+    /**
+     * @param $address
+     * @return mixed
+     */
     public function getDistrictIdFromAddress($address)
     {
         $url = "https://maps.googleapis.com/maps/api/geocode/json?address=" . urlencode($address) . "&key=AIzaSyDK5wM2IT_kGYYRTGo9dVr4hRi4loDRbGg";
@@ -211,6 +275,9 @@ class Business // extends Model
         }
     }
 
+    /**
+     * @param $request
+     */
     public function saveNewTransaction($request)
     {
         $this->transactions->id = $request->id;
@@ -224,15 +291,13 @@ class Business // extends Model
         $this->transactions->save();
     }
 
+    /**
+     * @param $category_id
+     * @return array
+     */
     public function getAllChildCategories($category_id)
     {
-        $category_result = [];
-        $categories = $this->categories->all();
-        foreach ($categories as $category) {
-            if ($this->getFinalParentCategory($category->id)->id == $category_id) {
-                $category_result[] = $category;
-            }
-        }
-        return $category_result;
+        $categories = $this->categories->where('parent_id', $category_id)->get();
+        return $categories;
     }
 }

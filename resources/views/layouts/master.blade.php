@@ -38,11 +38,13 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="{{route('home')}}"><img src="{{asset('bootflat/img/logo.png')}}" height="40"></a>
+                <a class="navbar-brand" href="{{route('home')}}"><img src="{{asset('bootflat/img/logo.png')}}"
+                                                                      height="40"></a>
             </div>
             <div class="collapse navbar-collapse">
                 <ul class="nav navbar-nav navbar-right">
                     <li><a class="nav-link" href="{{route('workers.index')}}">Worker</a></li>
+                    <li><a class="nav-link" href="{{route('category.index')}}">Category</a></li>
                     <li><a class="nav-link current" href="{{route('transactions.index')}}">Transaction</a></li>
                     <!-- Authentication Links -->
                     @if (Auth::guest())
@@ -140,32 +142,32 @@
             <span class="sr-only">Next</span>
         </a>
         {{--<div class="carousel-static hidden-xs">--}}
-            {{--<form>--}}
-                {{--<div class="form-group">--}}
-                    {{--<div class="col-md-5">--}}
-                        {{--<label for="sel1">Select list (select one):</label>--}}
-                        {{--<select class="form-control" id="sel1">--}}
-                            {{--<option>1</option>--}}
-                            {{--<option>2</option>--}}
-                            {{--<option>3</option>--}}
-                            {{--<option>4</option>--}}
-                        {{--</select>--}}
-                    {{--</div>--}}
-                    {{--<div class="col-md-5">--}}
-                        {{--<label for="sel2">Select list (select one):</label>--}}
-                        {{--<select class="form-control" id="sel2">--}}
-                            {{--<option>1</option>--}}
-                            {{--<option>2</option>--}}
-                            {{--<option>3</option>--}}
-                            {{--<option>4</option>--}}
-                        {{--</select>--}}
-                    {{--</div>--}}
-                    {{--<div class="col-md-2">--}}
-                        {{--<label></label>--}}
-                        {{--<button id="next" type="button" class="btn btn-success btn-block">Next step ></button>--}}
-                    {{--</div>--}}
-                {{--</div>--}}
-            {{--</form>--}}
+        {{--<form>--}}
+        {{--<div class="form-group">--}}
+        {{--<div class="col-md-5">--}}
+        {{--<label for="sel1">Select list (select one):</label>--}}
+        {{--<select class="form-control" id="sel1">--}}
+        {{--<option>1</option>--}}
+        {{--<option>2</option>--}}
+        {{--<option>3</option>--}}
+        {{--<option>4</option>--}}
+        {{--</select>--}}
+        {{--</div>--}}
+        {{--<div class="col-md-5">--}}
+        {{--<label for="sel2">Select list (select one):</label>--}}
+        {{--<select class="form-control" id="sel2">--}}
+        {{--<option>1</option>--}}
+        {{--<option>2</option>--}}
+        {{--<option>3</option>--}}
+        {{--<option>4</option>--}}
+        {{--</select>--}}
+        {{--</div>--}}
+        {{--<div class="col-md-2">--}}
+        {{--<label></label>--}}
+        {{--<button id="next" type="button" class="btn btn-success btn-block">Next step ></button>--}}
+        {{--</div>--}}
+        {{--</div>--}}
+        {{--</form>--}}
         {{--</div>--}}
     </div>
 @yield('header')
@@ -182,7 +184,8 @@
         <div class="row">
             <div class="col-md-4 col-sm-6 footerleft ">
                 <div class="logofooter"> Logo</div>
-                <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley.</p>
+                <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
+                    industry's standard dummy text ever since the 1500s, when an unknown printer took a galley.</p>
                 <p><i class="fa fa-map-pin"></i> 210, Aggarwal Tower, Rohini sec 9, New Delhi -        110085, INDIA</p>
                 <p><i class="fa fa-phone"></i> Phone (India) : +91 9999 878 398</p>
                 <p><i class="fa fa-envelope"></i> E-mail : info@webenlance.com</p>
@@ -209,9 +212,12 @@
                 </div>
             </div>
             <div class="col-md-3 col-sm-6 paddingtop-bottom">
-                <div class="fb-page" data-href="https://www.facebook.com/facebook" data-tabs="timeline" data-height="300" data-small-header="false" style="margin-bottom:15px;" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true">
+                <div class="fb-page" data-href="https://www.facebook.com/facebook" data-tabs="timeline"
+                     data-height="300" data-small-header="false" style="margin-bottom:15px;"
+                     data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true">
                     <div class="fb-xfbml-parse-ignore">
-                        <blockquote cite="https://www.facebook.com/facebook"><a href="https://www.facebook.com/facebook">Facebook</a></blockquote>
+                        <blockquote cite="https://www.facebook.com/facebook"><a
+                                    href="https://www.facebook.com/facebook">Facebook</a></blockquote>
                     </div>
                 </div>
             </div>

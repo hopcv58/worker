@@ -33,7 +33,7 @@
             {{--<div class="login-box-body">--}}
             <div class="panel-heading text-center"><h4>Đăng nhập vào hệ thống</h4></div>
             <div class="panel-body">
-                <form action="{{route('login')}}" method="post" class="form-horizontal">
+                <form action="" method="post" class="form-horizontal">
                     {{csrf_field()}}
                     <div class="form-group has-feedback {{$errors->has('email') ? ' has-error' : ''}}">
                         <label for="email" class="control-label col-md-4">E-Mail</label>

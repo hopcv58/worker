@@ -26,7 +26,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $categories = $this->business->getGrandCategory();
+        $categories = $this->business->getAllGrandCategories();
         return view('home',compact("categories"));
     }
 }

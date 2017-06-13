@@ -13,12 +13,13 @@
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('index');
 
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::resource('workers', 'WorkerController');
+Route::resource('transactions', 'TransactionController');
 Route::group(['prefix' => 'api'], function () {
     Route::resource('worker', 'WorkerAPIController');
     Route::resource('transaction', 'TransactionAPIController');

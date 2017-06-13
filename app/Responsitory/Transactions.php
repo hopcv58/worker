@@ -16,6 +16,8 @@ class Transactions extends BaseModel
         'description',
         'feedback',
         'rate',
+        'address',
+        'district_id',
         'started_at',
         'finished_at',
     ];

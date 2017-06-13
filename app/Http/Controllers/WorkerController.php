@@ -2,10 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Responsitory\Business;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Webpatser\Uuid\Uuid;
 
 class WorkerController extends Controller
 {
+    private $business;
+
+    /**
+     * WorkerController constructor.
+     */
+    public function __construct()
+    {
+        $this->business = new Business();
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -13,7 +26,15 @@ class WorkerController extends Controller
      */
     public function index()
     {
-        return view( 'worker.index');
+        if(!isset(Auth::user()->id)){
+            return redirect()->route('login');
+        }
+        $worker = $this->business->getWorkerByUserId(Auth::user()->id);
+        if (!isset($worker)) {
+            return view('worker.index', compact('worker'));
+        }
+        $transactions = $this->business->getTransactionByWorkerId($worker->id);
+        return view('worker.index', compact('worker', 'transactions'));
     }
 
     /**
@@ -29,29 +50,38 @@ class WorkerController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
-        //
+        $duplicate = $this->business->getWorkerByUserId(Auth::user()->id);
+        if(isset($duplicate)){
+            redirect()->route('workers.show', $duplicate->id);
+        } else {
+            $request->id = Uuid::generate();
+            $this->business->saveNewWorker($request);
+            return redirect()->route('workers.show', $request->id);
+        }
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
     {
-        return view("worker.show", compact("id"));
+        $worker = $this->business->getWorkerById($id);
+//        return view("worker.show", compact("worker"));
+        return response()->json($worker);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -62,8 +92,8 @@ class WorkerController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \Illuminate\Http\Request $request
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -74,7 +104,7 @@ class WorkerController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)

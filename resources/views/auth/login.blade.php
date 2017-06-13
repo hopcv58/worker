@@ -31,12 +31,12 @@
     <div class="col-md-6 col-md-offset-3">
         <div class="panel panel-default">
             {{--<div class="login-box-body">--}}
-            <div class="panel-heading text-center"><h4>Đăng nhập vào ban quản trị</h4></div>
+            <div class="panel-heading text-center"><h4>Đăng nhập vào hệ thống</h4></div>
             <div class="panel-body">
                 <form action="{{route('login')}}" method="post" class="form-horizontal">
                     {{csrf_field()}}
                     <div class="form-group has-feedback {{$errors->has('email') ? ' has-error' : ''}}">
-                        <label for="email" class="control-label col-md-4">E-Mail Address</label>
+                        <label for="email" class="control-label col-md-4">E-Mail</label>
                         <div class="col-md-6">
                             <input type="email" class="form-control" placeholder="Email" name="email"
                                    value="{{old('email')}}">
@@ -75,8 +75,9 @@
                     </div>
                     <!-- /.col -->
                     <div class="form-group">
-                        <div class="col-md-2 col-md-offset-4">
+                        <div class="col-md-5 col-md-offset-4">
                             <button type="submit" class="btn btn-primary btn-facebook">Sign In</button>
+                            <a href="{{route('register')}}" class="btn btn-primary btn-primary">Sign Up</a>
                         </div>
                     </div>
                     <!-- /.col -->

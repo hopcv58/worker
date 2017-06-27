@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Mockery\Exception;
+use Psy\Exception\ErrorException;
 use Webpatser\Uuid\Uuid;
 
 /**
@@ -33,7 +35,7 @@ class Business // extends Model
     {
         $this->categories = new Categories();
         $this->users = new User();
-        $this->customer = new Customers();
+        $this->customers = new Customers();
         $this->category_level = new Category_level();
         $this->workers = new Workers();
         $this->transactions = new Transactions();
@@ -62,10 +64,16 @@ class Business // extends Model
         $worker = $this->workers->find($id);
         $category_level = $this->category_level->select('category_id')->where('worker_id', '=', $id)->get();
         $worker->rate = $this->transactions->where('worker_id', '=', $id)->where('is_finished', '=', 1)->avg('rate');
+        if (!isset($worker->rate)) {
+            $worker->rate = 0;
+        }
         $jobs = [];
         $worker->feedback = $this->getFeedbackByWorkerId($id);
+        if (!isset($worker->feedback)) {
+            $worker->back = [];
+        }
         foreach ($category_level as $cate) {
-            $jobs[] = $this->getFinalParentCategory($cate->category_id);
+            $jobs[] = $this->getParentCategory($cate->category_id);
         }
         $jobs = array_unique($jobs);
         $worker->user = $this->getUserByWorkerId($id);
@@ -88,7 +96,7 @@ class Business // extends Model
         $jobs = [];
         $worker->feedback = $this->getFeedbackByWorkerId($user_id);
         foreach ($category_level as $cate) {
-            $jobs[] = $this->getFinalParentCategory($cate->category_id);
+            $jobs[] = $this->getParentCategory($cate->category_id);
         }
         $jobs = array_unique($jobs);
         $worker->user = $this->users->find($user_id);
@@ -102,7 +110,7 @@ class Business // extends Model
      */
     public function getCustomerByUserId($user_id)
     {
-        $customer = $this->customer->where('user_id', $user_id)->first();
+        $customer = $this->customers->where('user_id', $user_id)->first();
         if (!isset($customer)) {
             return $customer;
         }
@@ -131,6 +139,9 @@ class Business // extends Model
      */
     public function getUserByWorkerId($id)
     {
+        if (!isset($id)) {
+            return null;
+        }
         $worker = $this->workers->find($id);
         $user = $this->users->find($worker->user_id);
         return $user;
@@ -142,7 +153,7 @@ class Business // extends Model
      */
     public function getUserByCustomerId($id)
     {
-        $customer = $this->customer->find($id);
+        $customer = $this->customers->find($id);
         $user = $this->users->find($customer->user_id);
         return $user;
     }
@@ -164,7 +175,7 @@ class Business // extends Model
      * @param $id
      * @return mixed
      */
-    public function getFinalParentCategory($id)
+    public function getParentCategory($id)
     {
         $category = $this->categories->select('id', 'name', 'description', 'parent_id')->where('id', '=', $id)->where('is_public', '=', 1)->first();
         $parent = $this->categories->select('name', 'description', 'parent_id')->where('id', '=', $category->parent_id)->first();
@@ -232,16 +243,18 @@ class Business // extends Model
     /**
      * @param $request
      */
-    public function saveNewWorker($request)
+    public function saveNewWorker(Request $request)
     {
+        $this->workers->district_id = $this->findOrCreateDistrictIdByAddress($request->address);
+        $this->workers->lat = $this->getLatLngFromAddress($request->address)["lat"];
+        $this->workers->lng = $this->getLatLngFromAddress($request->address)["lng"];
         $this->workers->id = $request->id;
-        $this->workers->customer_id = Auth::user()->id;
-        $this->workers->category_id = "f15a4770-4437-11e7-a47f-54a050032ab0";
-        $this->workers->address = $request->address;
-        $this->workers->district_id = $this->getDistrictIdFromAddress($request->address);
-        $this->workers->title = $request->title;
         $this->workers->description = $request->description;
-        $this->workers->started_at = $request->start_date . " " . $request->start_time . ":00";
+        $this->workers->address = $request->address;
+        $this->workers->website = $request->website;
+        $this->workers->bank_account = $request->bank_account;
+        $this->workers->type = $request->type;
+        $this->workers->user_id = Auth::user()->id;
         $this->workers->save();
     }
 
@@ -249,15 +262,21 @@ class Business // extends Model
      * @param $name
      * @return mixed
      */
-    public function findOrCreateDistrictByName($name)
+    public function findOrCreateDistrictIdByAddress($address)
     {
-        $district = $this->districts->where('name', $name)->first();
-        if (!isset($district)) {
-            $district->id = Uuid::generate();
-            $district->name = $name;
-            $district->save();
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?address=" . urlencode($address) . "&key=AIzaSyDK5wM2IT_kGYYRTGo9dVr4hRi4loDRbGg";
+        $json = json_decode(file_get_contents($url), true);
+        foreach ($json["results"][0]["address_components"] as $address_component) {
+            if (in_array("administrative_area_level_2", $address_component["types"])) {
+                $district = $this->districts->firstOrNew(['name' => $address_component["long_name"]]);
+                if (!isset($district->id)) {
+                    $district->id = Uuid::generate();
+                    $district->name = $address_component["long_name"];
+                    $district->save();
+                }
+                return $district->id;
+            }
         }
-        return $district;
     }
 
     /**
@@ -268,9 +287,11 @@ class Business // extends Model
     {
         $url = "https://maps.googleapis.com/maps/api/geocode/json?address=" . urlencode($address) . "&key=AIzaSyDK5wM2IT_kGYYRTGo9dVr4hRi4loDRbGg";
         $json = json_decode(file_get_contents($url), true);
+        if (sizeof($json["results"]) == 0) return "";
         foreach ($json["results"][0]["address_components"] as $address_component) {
             if (in_array("administrative_area_level_2", $address_component["types"])) {
-                return $this->findOrCreateDistrictByName($address_component["long_name"])->id;
+                return $this->districts->where('name', $address_component["long_name"])->first()->id;
+//                return $this->findOrCreateDistrictByName($address_component["long_name"])->id;
             }
         }
     }
@@ -278,17 +299,21 @@ class Business // extends Model
     /**
      * @param $request
      */
-    public function saveNewTransaction($request)
+    public function saveNewTransaction(Request $request)
     {
+        $path = 'images/';
+        $array_image = $this->saveManyImg($request->file('img'), $path);
+        $this->transactions->images = json_encode($array_image);
         $this->transactions->id = $request->id;
-        $this->transactions->customer_id = Auth::user()->id;
-        $this->transactions->category_id = "f15a4770-4437-11e7-a47f-54a050032ab0";
+        $this->transactions->customer_id = $request->customer_id;
+        $this->transactions->category_id = $request->category_id;
         $this->transactions->address = $request->address;
-        $this->transactions->district_id = $this->getDistrictIdFromAddress($request->address);
+        $this->transactions->district_id = $this->findOrCreateDistrictIdByAddress($request->address);
         $this->transactions->title = $request->title;
         $this->transactions->description = $request->description;
         $this->transactions->started_at = $request->start_date . " " . $request->start_time . ":00";
         $this->transactions->save();
+        return $this->transactions;
     }
 
     /**
@@ -299,5 +324,140 @@ class Business // extends Model
     {
         $categories = $this->categories->where('parent_id', $category_id)->get();
         return $categories;
+    }
+
+    public function searchChildCategoriesByName($category_id, $name)
+    {
+        $query = $this->categories->where('name', 'like', '%' . $name . '%');
+        if ($category_id != "") {
+            $query = $query->where('parent_id', $category_id);
+        }
+        $categories = $query->get();
+        return $categories;
+    }
+
+    public function getTransactionByCategoryId($category_id)
+    {
+        $transactions = $this->transactions->where('category_id', '=', $category_id)->get();
+        return $transactions;
+    }
+
+    public function getNewTransactionByCategoryId($category_id)
+    {
+        $transactions = $this->transactions->where('category_id', '=', $category_id)
+            ->where('is_finished', '=', 0)->get();
+        return $transactions;
+    }
+
+    public function getOldTransactionByCategoryId($category_id)
+    {
+        $transactions = $this->transactions->where('category_id', '=', $category_id)
+            ->where('is_finished', '=', 1)->get();
+        return $transactions;
+    }
+
+    public function getCategoryById($category_id)
+    {
+        $category = $this->categories->find($category_id);
+        return $category;
+    }
+
+    public function createCustomerWithAddress($user_id, $address)
+    {
+        $this->customers->id = Uuid::generate();
+        $this->customers->address = $address;
+        $this->customers->district_id = $this->findOrCreateDistrictIdByAddress($address);
+        $this->customers->user_id = $user_id;
+        $this->customers->save();
+        return $this->customers->id;
+    }
+
+    private function getWorkerByCategoryId($category)
+    {
+        $ids = $this->category_level->select('worker_id')->where('category_id', $category)->get();
+        $workers = [];
+        foreach ($ids as $id) {
+            $workers[] = $this->getWorkerById($id->worker_id);
+        }
+        $workers = array_unique($workers);
+        return $workers;
+    }
+
+    private function getWorkerByDistrictId($district)
+    {
+        $query = $this->workers->select('id');
+        if (isset($district)) {
+            $query = $query->where('district_id', $district);
+        }
+        $ids = $query->get();
+        $workers = [];
+        foreach ($ids as $id) {
+            $workers[] = $this->getWorkerById($id->id);
+        }
+        return $workers;
+    }
+
+    public function getWorkerByCategoryAndDistrict($category, $district)
+    {
+        if (isset($category)) {
+            if (isset($district)) {
+                $ids = $this->workers->join('category_levels', 'workers.id', '=', 'category_levels.worker_id')
+                    ->select('workers.id')->where('workers.district_id', $district)
+                    ->where('category_levels.category_id', $category)->get();
+                $workers = [];
+                foreach ($ids as $id) {
+                    $workers[] = $this->getWorkerById($id->id);
+                }
+                return $workers;
+            } else {
+                return $this->getWorkerByCategoryId($category);
+            }
+        } else {
+            return $this->getWorkerByDistrictId($district);
+        }
+    }
+
+    public function getLatLngFromAddress($address)
+    {
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?address=" . urlencode($address) . "&key=AIzaSyDK5wM2IT_kGYYRTGo9dVr4hRi4loDRbGg";
+        $json = json_decode(file_get_contents($url), true);
+        return $json["results"][0]["geometry"]["location"];
+    }
+
+    /**
+     * upload nhieu anh
+     * @param array $imgs
+     * @param string $path
+     * @return array|\Illuminate\Http\RedirectResponse
+     */
+    public function saveManyImg($imgs, $path)
+    {
+        $names = [];
+        if ($imgs == null) {
+            return null;
+        }
+        foreach ($imgs as $img) {
+            $err = null;
+            $name = $img->getClientOriginalName();
+            $ext = $img->getClientOriginalExtension();
+            //kiem tra file trung ten
+            while (file_exists($path . '/' . $name)) {
+                $name = str_random(5) . "_" . $name;
+            }
+            $arr_ext = ['png', 'jpg', 'gif', 'jpeg'];
+            if (!in_array($ext, $arr_ext)) {
+                $names = null;
+                return redirect()->back()->with('not_img', 'Chọn file ảnh png jpg gif jpeg có kích thước < 5Mb');
+            } else {
+                $img->move($path, $name);
+                $names[] = $name;
+            }
+        }
+        return $names;
+    }
+
+    public function getUserByToken($token)
+    {
+        return $this->users->where("remember_token", $token)->first();
     }
 }

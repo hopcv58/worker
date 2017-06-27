@@ -7,20 +7,21 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">Need a Worker? What do you want?</div>
                     <div class="panel-body">
-                        <form class="form-horizontal" role="form" method="POST" action="{{ route('register') }}">
-                            {{ csrf_field() }}
+                        <form class="form-horizontal" role="form" method="get" action="{{route('transactions.create')}}">
 
                             <div class="form-group">
                                 <label for="type" class="col-md-4 control-label">Select one: </label>
 
                                 <div class="col-md-6">
-                                    <select name="type" class="selecter_1" id="grand_category">
+                                    <select class="selecter_1" id="grand_category">
                                         @foreach($categories as $category)
                                             <option value="{{$category->id}}">{{$category->name}}</option>
                                         @endforeach
                                     </select>
-                                    <select name="type" class="selecter_1" id="child_category">
-                                        <option value=""> Select one</option>
+                                    <select name="category" class="" id="child_category">
+                                        @foreach($category->child as $cate)
+                                            <option value="{{$cate->id}}">{{$cate->name}}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>

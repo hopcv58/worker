@@ -12,6 +12,8 @@ class Customers extends BaseModel
     ];
     protected $fillable = [
         'id',
+        'user_id',
+        'district_id',
         'address',
     ];
     protected $hidden = [

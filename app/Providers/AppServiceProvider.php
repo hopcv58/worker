@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Responsitory\Business;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -13,7 +14,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        view()->composer('layouts.master', function ($view) {
+            $business = new Business();
+            $view->with('grand_categories', $business->getAllGrandCategories());
+        });
     }
 
     /**

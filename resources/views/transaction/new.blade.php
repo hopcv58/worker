@@ -7,16 +7,31 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">New transaction</div>
                     <div class="panel-body">
-                        <form class="form-horizontal" role="form" method="POST"
+                        <form class="form-horizontal" role="form" method="POST" enctype="multipart/form-data"
                               action="{{ route('transactions.store') }}">
                             {{ csrf_field() }}
+
+                            <div class="form-group">
+                                <label for="grand_category" class="col-md-4 control-label">Select one: </label>
+
+                                <div class="col-md-6">
+                                    <select class="form-control" id="grand_category">
+                                        @foreach($categories as $category)
+                                            <option value="{{$category->id}}">{{$category->name}}</option>
+                                        @endforeach
+                                    </select>
+                                    <select name="category_id" class="form-control" id="child_category">
+                                        <option value="">Select one</option>
+                                    </select>
+                                </div>
+                            </div>
 
                             <div class="form-group{{ $errors->has('address') ? ' has-error' : '' }}">
                                 <label for="address" class="col-md-4 control-label">Location</label>
 
                                 <div class="col-md-6">
                                     <input id="address" type="text" class="form-control" name="address"
-                                           value="{{ old('address') }}" required>
+                                           required>
 
                                     @if ($errors->has('description'))
                                         <span class="help-block">
@@ -69,10 +84,24 @@
                                 </div>
                             </div>
 
+                            <div class="form-group{{ $errors->has('img') ? ' has-error' : '' }}">
+                                <label for="img" class="col-md-4 control-label">Image Detail </label>
+
+                                <div class="col-md-6">
+                                    <input type="file" name="img[]" multiple
+                                           value="{{old('img')}}">
+                                    @if($errors->has('img'))
+                                        <span class="help-block">
+                                    <strong>{{$errors->first('img')}}</strong>
+                                         </span>
+                                    @endif
+                                </div>
+                            </div>
+
                             <div class="form-group">
                                 <div class="col-md-6 col-md-offset-4">
                                     <button type="submit" class="btn btn-primary">
-                                        Register
+                                        Next step
                                     </button>
                                 </div>
                             </div>
@@ -94,10 +123,23 @@
 
 @section('extra_js')
     <script>
-        // This example requires the Places library. Include the libraries=places
-        // parameter when you first load the API. For example:
-        // <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places">
-
+        function changeSelectContent() {
+            $.getJSON("http://localhost:8000/api/category/" + $("#grand_category").val(), function (data) {
+                var optionsAsString = "";
+                for (var i = 0; i < data.child.length; i++) {
+                    optionsAsString += "<option value='" + data.child[i].id + "'>" + data.child[i].name + "</option>";
+                }
+                $("#child_category").find("option").remove().end().append(optionsAsString);
+            });
+        }
+        $(document).ready(function () {
+            changeSelectContent();
+            $("#grand_category").change(function () {
+                changeSelectContent();
+            });
+        });
+    </script>
+    <script>
         function initMap() {
             var map = new google.maps.Map(document.getElementById('map'), {
                 center: {lat: 21.037743, lng: 105.781418},

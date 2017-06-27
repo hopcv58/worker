@@ -1,5 +1,14 @@
 @extends('layouts.master')
 
+@section('extra_js')
+    <script>
+        $.getJSON("{{route('worker.index')}}", function (result) {
+//            $.each(result, function(i, row){
+            alert(row.id);
+//            });
+        });
+    </script>
+@endsection
 @section('content')
     <div class="example">
         <div class="container">

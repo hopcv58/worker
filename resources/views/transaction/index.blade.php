@@ -1,13 +1,13 @@
 @extends('layouts.master')
 
 @section('extra_js')
-    <script>
-        $.getJSON("{{route('worker.index')}}", function (result) {
-//            $.each(result, function(i, row){
-            alert(row.id);
-//            });
-        });
-    </script>
+    {{--<script>--}}
+        {{--$.getJSON("{{route('worker.index')}}", function (result) {--}}
+{{--//            $.each(result, function(i, row){--}}
+            {{--alert(row.id);--}}
+{{--//            });--}}
+        {{--});--}}
+    {{--</script>--}}
 @endsection
 @section('content')
     <div class="example">
@@ -18,7 +18,7 @@
                 @foreach($transactions as $transaction)
                     <div class="col-md-3 section-row">
                         <a href="{{route('transactions.show',$transaction->id)}}"><img
-                                    src="{{$transaction->customer->avatar_path}})}}"
+                                    src="{{asset("images/".json_decode($transaction->images)[0])}}"
                                     class="img-responsive margin" alt="Image"></a>
                         <a href="{{route('transactions.show',$transaction->id)}}">{{$transaction->title}}</a>
                         <p>{{ $transaction->address }}</p>

@@ -2,19 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Responsitory\Business;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cookie;
-use Illuminate\Support\Facades\Session;
-use Webpatser\Uuid\Uuid;
+use Illuminate\Http\Request;
 
-class TransactionController extends Controller
+class CategoryAPIController extends Controller
 {
     private $business;
 
     /**
-     * TransactionController constructor.
+     * CategoryAPIController constructor.
      */
     public function __construct()
     {
@@ -28,15 +24,7 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        if (!isset(Auth::user()->id)) {
-            return redirect()->route('login');
-        }
-        $customer = $this->business->getCustomerByUserId(Auth::user()->id);
-        if (!isset($customer)) {
-            return view('transaction.index', compact('customer'));
-        }
-        $transactions = $this->business->getTransactionByCustomerId($customer->id);
-        return view('transaction.index', compact('customer', 'transactions'));
+        //
     }
 
     /**
@@ -46,25 +34,18 @@ class TransactionController extends Controller
      */
     public function create()
     {
-        $categories = $this->business->getAllGrandCategories();
-        if (isset(Auth::user()->id)){
-            $address =  $this->business->getCustomerByUserId(Auth::user()->id);
-        }
 
-        return view('transaction.new',compact("categories","address"));
     }
 
     /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
-        $request->id = Uuid::generate();
-        $request->customer_id = $this->business->getCustomerByUserId(Auth::user()->id)->id;
-        $transaction = $this->business->saveNewTransaction($request);
-        return redirect()->route("transactions.show",$transaction->id);
+        //
     }
 
     /**
@@ -75,8 +56,9 @@ class TransactionController extends Controller
      */
     public function show($id)
     {
-        $transaction = $this->business->getTransactionById($id);
-        return view("transaction.show", compact("transaction"));
+        $category = $this->business->getCategoryById($id);
+        $category->child = $this->business->getAllChildCategories($id);
+        return response()->json($category);
     }
 
     /**

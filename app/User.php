@@ -8,6 +8,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class User extends Authenticatable
 {
     use Notifiable;
+    /**
+     * Indicates if the IDs are auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = false;
     protected $casts = [
         'id' => 'string',
     ];
@@ -17,7 +23,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'id','name', 'email', 'password','avatar_path','phone'
+        'id', 'name', 'email', 'password', 'avatar_path', 'phone'
     ];
 
     /**
@@ -26,6 +32,6 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token','activation_token','is_activated','created_at','updated_at',
+        'password', 'remember_token', 'activation_token', 'is_activated', 'created_at', 'updated_at',
     ];
 }

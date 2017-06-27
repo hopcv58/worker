@@ -18,9 +18,11 @@ class Workers extends BaseModel
         'type',
         'degree',
         'bank_account',
+        'lat',
+        'lng'
     ];
     protected $hidden = [
-        'created_at','updated_at',
+        'created_at', 'updated_at',
     ];
 
     public function rule()

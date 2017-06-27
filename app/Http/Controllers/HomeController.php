@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 class HomeController extends Controller
 {
     private $business;
+
     /**
      * Create a new controller instance.
      *
@@ -16,7 +17,7 @@ class HomeController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->business= new Business();
+        $this->business = new Business();
     }
 
     /**
@@ -27,6 +28,11 @@ class HomeController extends Controller
     public function index()
     {
         $categories = $this->business->getAllGrandCategories();
-        return view('home',compact("categories"));
+        return view('home', compact("categories"));
+    }
+
+    public function showProfile()
+    {
+
     }
 }

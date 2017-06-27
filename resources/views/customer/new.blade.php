@@ -21,9 +21,13 @@
         }
     </style>
     <script>
+        // This example requires the Places library. Include the libraries=places
+        // parameter when you first load the API. For example:
+        // <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places">
+
         function initMap() {
             var map = new google.maps.Map(document.getElementById('map'), {
-                center: {lat: 21.037743, lng: 105.781418},
+                center: {lat: -33.8688, lng: 151.2195},
                 zoom: 13
             });
             var input = document.getElementById('address');
@@ -90,9 +94,8 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">Register</div>
                     <div class="panel-body">
-                        <form class="form-horizontal" role="form" method="POST" action="{{route('workers.store')}}">
+                        <form class="form-horizontal" role="form" method="POST" action="">
                             {{ csrf_field() }}
-
                             <div class="form-group{{ $errors->has('address') ? ' has-error' : '' }}">
                                 <label for="address" class="col-md-4 control-label">Address</label>
 

@@ -2,27 +2,18 @@
 
 namespace App\Http\Controllers;
 
-
-use App\Responsitory\Business;
 use Illuminate\Http\Request;
 
-class WorkerAPIController extends Controller
+class CustomerController extends Controller
 {
-    protected $business;
-    public function __construct()
-    {
-        $this->business = new Business();
-    }
-
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index()
     {
-        $workers = $this->business->getWorkerByCategoryAndDistrict($request->category,$request->district);
-        return response()->json($workers);
+        //
     }
 
     /**
@@ -32,7 +23,7 @@ class WorkerAPIController extends Controller
      */
     public function create()
     {
-        //
+        return view('customer.new');
     }
 
     /**
@@ -43,8 +34,7 @@ class WorkerAPIController extends Controller
      */
     public function store(Request $request)
     {
-        $this->business->saveNewWorker($request);
-        return redirect(url()->previous());
+        //
     }
 
     /**
@@ -55,8 +45,7 @@ class WorkerAPIController extends Controller
      */
     public function show($id)
     {
-        $worker = $this->business->getWorkerById($id);
-        return response()->json($worker);
+        //
     }
 
     /**
@@ -91,10 +80,5 @@ class WorkerAPIController extends Controller
     public function destroy($id)
     {
         //
-    }
-
-    public function showWorkerByCategoryAndDistrict($category,$district = "")
-    {
-
     }
 }

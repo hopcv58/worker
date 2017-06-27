@@ -4,14 +4,13 @@
     <meta charset="utf-8">
     <title>Documentation - Bootflat</title>
     <!-- Sets initial viewport load and disables zooming  -->
+    <meta name="csrf-token" content="{{ csrf_token() }}"/>
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
     <!-- SmartAddon.com Verification -->
     <meta name="smartaddon-verification" content="936e8d43184bc47ef34e25e426c508fe"/>
     <meta name="keywords"
           content="Flat UI Design, UI design, UI, user interface, web interface design, user interface design, Flat web design, Bootstrap, Bootflat, Flat UI colors, colors">
     <meta name="description" content="The complete style of the Bootflat Framework.">
-    <link rel="shortcut icon" href="favicon_16.ico"/>
-    <link rel="bookmark" href="favicon_16.ico"/>
     <!-- site css -->
     <link rel="stylesheet" href="{{asset('css/my.css')}}">
     <link rel="stylesheet" href="{{asset('bootflat/css/site.min.css')}}">
@@ -38,19 +37,47 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="{{route('home')}}"><img src="{{asset('bootflat/img/logo.png')}}"
-                                                                      height="40"></a>
+                <a class="navbar-brand" href="{{route('home')}}">
+                    <img src="{{asset('bootflat/img/logo.png')}}" height="40">
+                </a>
             </div>
             <div class="collapse navbar-collapse">
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a class="nav-link" href="{{route('workers.index')}}">Worker</a></li>
-                    <li><a class="nav-link" href="{{route('category.index')}}">Category</a></li>
-                    <li><a class="nav-link current" href="{{route('transactions.index')}}">Transaction</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                           aria-expanded="false"> Category <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="{{route('categories.index')}}">Index</a></li>
+                            <li><a href="{{route('categories.create')}}">Create</a></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                           aria-expanded="false"> Transaction <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="{{route('transactions.index')}}">Index</a></li>
+                            <li><a href="{{route('transactions.create')}}">Create</a></li>
+                        </ul>
+                    </li>
                     <!-- Authentication Links -->
                     @if (Auth::guest())
                         <li><a href="{{ route('login') }}">Login</a></li>
                         <li><a href="{{ route('register') }}">Register</a></li>
                     @else
+                        <li class="dropdown current">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                               aria-expanded="false"> Worker <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="{{route('workers.index')}}">Index</a></li>
+                                <li><a href="{{route('workers.create')}}">Create</a></li>
+                                <li><a href="{{route('workers.addForm')}}">Add new service</a></li>
+                                <li><a href="{{route('workers.edit')}}">Update Worker's info</a></li>
+                            </ul>
+                        </li>
+
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
                                aria-expanded="false">
@@ -58,15 +85,14 @@
                                            src="{{Auth::user()->avatar_path}}"></span>{{ Auth::user()->name }} <span
                                         class="caret"></span>
                             </a>
-
                             <ul class="dropdown-menu" role="menu">
+                                <li><a href="{{route('profile')}}">Profile</a></li>
                                 <li>
                                     <a href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">
                                         Logout
                                     </a>
-
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST"
                                           style="display: none;">
                                         {{ csrf_field() }}
@@ -76,6 +102,32 @@
                         </li>
                     @endif
                 </ul>
+                <form class="navbar-form navbar-search pull-right" method="GET" action="{{route('search')}}">
+                    <div class="input-group">
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-search btn-default dropdown-toggle"
+                                    data-toggle="dropdown">
+                                <span class="label-icon">Select Category</span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                @foreach($grand_categories as $grand_category)
+                                    <li>
+                                        <a href="#" value="{{$grand_category->id}}">{{$grand_category->name}}</a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        <input name="category" id="category_navbar" hidden="">
+                        <input name="address" id="address_navbar" type="text" class="form-control">
+                        <div class="input-group-btn">
+                            <button type="submit" class="btn btn-search btn-default">
+                                <span class="glyphicon glyphicon-search"></span>
+                                <span class="label-icon">Search</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </nav>
@@ -141,34 +193,6 @@
             <span class="glyphicon glyphicon-chevron-right"></span>
             <span class="sr-only">Next</span>
         </a>
-        {{--<div class="carousel-static hidden-xs">--}}
-        {{--<form>--}}
-        {{--<div class="form-group">--}}
-        {{--<div class="col-md-5">--}}
-        {{--<label for="sel1">Select list (select one):</label>--}}
-        {{--<select class="form-control" id="sel1">--}}
-        {{--<option>1</option>--}}
-        {{--<option>2</option>--}}
-        {{--<option>3</option>--}}
-        {{--<option>4</option>--}}
-        {{--</select>--}}
-        {{--</div>--}}
-        {{--<div class="col-md-5">--}}
-        {{--<label for="sel2">Select list (select one):</label>--}}
-        {{--<select class="form-control" id="sel2">--}}
-        {{--<option>1</option>--}}
-        {{--<option>2</option>--}}
-        {{--<option>3</option>--}}
-        {{--<option>4</option>--}}
-        {{--</select>--}}
-        {{--</div>--}}
-        {{--<div class="col-md-2">--}}
-        {{--<label></label>--}}
-        {{--<button id="next" type="button" class="btn btn-success btn-block">Next step ></button>--}}
-        {{--</div>--}}
-        {{--</div>--}}
-        {{--</form>--}}
-        {{--</div>--}}
     </div>
 @yield('header')
 <!--documents-->
@@ -244,5 +268,39 @@
     </div>
 </div>
 @yield('extra_js')
+{{--<script>
+
+    function initMap() {
+        var input = document.getElementById('address_navbar');
+
+        var autocomplete = new google.maps.places.Autocomplete(input);
+
+        // Bind the map's bounds (viewport) property to the autocomplete object,
+        // so that the autocomplete requests use the current map bounds for the
+        // bounds option in the request.
+
+        autocomplete.addListener('place_changed', function () {
+            var place = autocomplete.getPlace();
+            if (!place.geometry) {
+                // User entered the name of a Place that was not suggested and
+                // pressed the Enter key, or the Place Details request failed.
+                window.alert("No details available for input: '" + place.name + "'");
+                return;
+            }
+        });
+    }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD2sz2ks3hz-4W9jzzyxw-UP3dJXBkR9tg&libraries=places&callback=initMap"
+        async defer></script>--}}
+<script>
+    $(function () {
+        $(".input-group-btn .dropdown-menu li a").click(function () {
+            var selText = $(this).html();
+            var selVal = $(this).attr("value");
+            $(this).parents('.input-group-btn').find('.btn-search').html(selText);
+            $("#category_navbar").val(selVal);
+        });
+    });
+</script>
 </body>
 </html>

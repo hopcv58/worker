@@ -16,6 +16,7 @@ class WorkerController extends Controller
      */
     public function __construct()
     {
+        $this->middleware('auth');
         $this->business = new Business();
     }
 
@@ -26,9 +27,6 @@ class WorkerController extends Controller
      */
     public function index()
     {
-        if(!isset(Auth::user()->id)){
-            return redirect()->route('login');
-        }
         $worker = $this->business->getWorkerByUserId(Auth::user()->id);
         if (!isset($worker)) {
             return view('worker.index', compact('worker'));
@@ -55,9 +53,12 @@ class WorkerController extends Controller
      */
     public function store(Request $request)
     {
+        if (!isset(Auth::user()->id)) {
+            return redirect()->route('login');
+        }
         $duplicate = $this->business->getWorkerByUserId(Auth::user()->id);
-        if(isset($duplicate)){
-            redirect()->route('workers.show', $duplicate->id);
+        if (isset($duplicate)) {
+            redirect()->route('workers.show', Auth::user()->id);
         } else {
             $request->id = Uuid::generate();
             $this->business->saveNewWorker($request);
@@ -74,17 +75,20 @@ class WorkerController extends Controller
     public function show($id)
     {
         $worker = $this->business->getWorkerById($id);
-//        return view("worker.show", compact("worker"));
-        return response()->json($worker);
+        if (!isset($worker)) {
+            return view('worker.show', compact('worker'));
+        }
+        $transactions = $this->business->getTransactionByWorkerId($worker->id);
+        return view('worker.show', compact('worker', 'transactions'));
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int $id
+     * @param
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit()
     {
         //
     }
@@ -93,10 +97,9 @@ class WorkerController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request $request
-     * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
         //
     }
@@ -110,5 +113,15 @@ class WorkerController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function showAddServiceForm()
+    {
+
+    }
+
+    public function addNewService()
+    {
+
     }
 }
